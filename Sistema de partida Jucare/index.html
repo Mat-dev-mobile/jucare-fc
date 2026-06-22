@@ -60,13 +60,12 @@
         window.location.href = "partida.html";
     }
 
-    // FUNÇÃO ATUALIZADA: Agora ela conversa com o Node.js!
+    // FUNÇÃO DE VERIFICAÇÃO CONECTADA À RENDER
     async function verificarAcesso() {
         const nomeInput = document.getElementById("nomeTreinador").value.trim();
         const chaveInput = document.getElementById("chaveAcesso").value;
         const erroDiv = document.getElementById("erroLogin");
 
-        // Limpa mensagens de erro anteriores
         erroDiv.innerHTML = "";
 
         if (nomeInput === "") {
@@ -75,8 +74,8 @@
         }
 
         try {
-            // 🚀 Jogada ensaiada: Envia os dados para a API no Node.js
-            const resposta = await fetch("http://localhost:3000/login", {
+            // Conexão direta com a API da Render
+            const resposta = await fetch('https://jucare-api.onrender.com/login', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -87,21 +86,19 @@
                 })
             });
 
-            // Transforma a resposta do servidor em um objeto JS
             const dados = await resposta.json();
 
             if (resposta.ok) {
-                // Se o Node aceitou a senha, salvamos o nome e liberamos o acesso!
+                // Login aceito pelo servidor na nuvem
                 localStorage.setItem("usuarioJucare", nomeInput);
                 window.location.href = "partida.html";
             } else {
-                // Se o Node rejeitou (Erro 401 ou 400), mostra a mensagem que o Node mandou
-                erroDiv.innerHTML = `❌ ${dados.erro}`;
+                // Caso a senha esteja errada, exibe o aviso retornado pelo Node
+                erroDiv.innerHTML = `❌ ${dados.erro || 'Acesso negado!'}`;
             }
 
         } catch (error) {
-            // Se o servidor Node estiver desligado, cai aqui
-            erroDiv.innerHTML = "⚠️ Erro ao conectar com o servidor do Jucaré! O Node está ligado?";
+            erroDiv.innerHTML = "⚠️ Erro ao conectar com o servidor do Jucaré na nuvem!";
             console.error("Erro na requisição:", error);
         }
     }

@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Jucaré F.C.</title>
-    <!-- Importando o Bootstrap 5 para estrutura profissional -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Customização de Cores baseadas no Escudo do Jucaré -->
     <style>
         body {
             background-color: #121212; /* Fundo Dark profissional */
@@ -39,25 +37,21 @@
 </head>
 <body>
 
-    
-
     <div class="container mt-5" style="max-width: 600px;">
         
-        <!-- Cabeçalho Alinhado com a Logo -->
         <div class="text-center mb-4">
-    <img src="Imagens/Jucare.jpg" alt="Logo Jucaré F.C." class="rounded-circle shadow" style="width: 100px; border: 3px solid #ffcc00;">
-    <h1 class="mt-2 text-jucare-amarelo fw-bold">Jucaré F.C.</h1>
-    
-    <h5 class="text-white mt-3 fw-normal">
-        Prazer, <strong class="text-jucare-amarelo" id="usuarioLogado">Treinador</strong>! Vamos começar os trabalhos?
-    </h5>
+            <img src="Imagens/Jucare.jpg" alt="Logo Jucaré F.C." class="rounded-circle shadow" style="width: 100px; border: 3px solid #ffcc00;">
+            <h1 class="mt-2 text-jucare-amarelo fw-bold">Jucaré F.C.</h1>
+            
+            <h5 class="text-white mt-3 fw-normal">
+                Prazer, <strong class="text-jucare-amarelo" id="usuarioLogado">Treinador</strong>! Vamos começar os trabalhos?
+            </h5>
 
-    <div class="d-flex justify-content-center align-items-center gap-2 mt-2">
-        <button onclick="fazerLogout()" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 12px;">Sair 🚪</button>
-          </div>
+            <div class="d-flex justify-content-center align-items-center gap-2 mt-2">
+                <button onclick="fazerLogout()" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 12px;">Sair 🚪</button>
+            </div>
         </div>
 
-        <!-- Formulário de Cadastro Estilizado -->
         <div class="card p-4 bg-jucare-preto text-white rounded shadow-lg mb-5">
             <h4 class="mb-3 text-jucare-amarelo text-center">Registrar Nova Partida</h4>
             
@@ -100,52 +94,50 @@
             <button onclick="cadastrarPartida()" class="btn btn-jucare w-100 mt-2">Gravar Partida no Histórico</button>
         </div>
 
-        <!-- Título do Feed de Jogos -->
         <h4 class="text-jucare-amarelo mb-3 fw-bold">📋 Histórico de Jogos</h4>
         
-        <!-- DIV que recebe a lista de cards via JS -->
         <div id="listaDeJogosNaTela"></div>
 
     </div>
+
     <script>
-    // 🛡️ SEGURANÇA DA PÁGINA: Resgata o nome guardado no login
+    // 🛡️ Resgata o nome guardado no login
     const treinadorLogado = localStorage.getItem("usuarioJucare");
 
     if (!treinadorLogado) {
         window.location.href = "index.html";
     }
 
-    // 🚀 EVENTO DE CARREGAMENTO: Executa assim que a página abre
+    // 🚀 Executa assim que a página abre
     window.onload = function() {
         if (treinadorLogado) {
             document.getElementById("usuarioLogado").textContent = treinadorLogado;
         }
-        // Busca os jogos direto do banco de dados MySQL
         puxarPartidasDoBanco();
     };
 
-    // Função para apagar o login e voltar pra recepção
     function fazerLogout() {
         localStorage.removeItem("usuarioJucare");
         window.location.href = "index.html";
     }
 
-    // 📋 BUSCAR PARTIDAS (Conversa com o GET /partidas do Node)
+    // 📋 BUSCAR PARTIDAS (Método GET correto para listar)
     async function puxarPartidasDoBanco() {
         const containerJogos = document.getElementById("listaDeJogosNaTela");
         
         try {
-            const resposta = await fetch("http://localhost:3000/partidas");
+            // Requisita a lista real de partidas salvas na nuvem
+            const resposta = await fetch('https://jucare-api.onrender.com/partidas');
             const partidas = await resposta.json();
-
-            if (partidas.length === 0) {
-                containerJogos.innerHTML = "<p class='text-muted text-center'>Nenhuma partida registrada no banco do Jucaré ainda.</p>";
-                return;
-            }
 
             containerJogos.innerHTML = "";
             
-            // Desenha os cards na tela usando os nomes das colunas vindas do MySQL
+            if (partidas.length === 0) {
+                containerJogos.innerHTML = "<p class='text-muted text-center'>Nenhum jogo cadastrado no histórico ainda.</p>";
+                return;
+            }
+
+            // Desenha os cards dinamicamente na tela
             partidas.forEach(function(partida) {
                 containerJogos.innerHTML += `
                     <div class="card card-partida p-3 mb-3 text-white shadow">
@@ -176,7 +168,7 @@
         }
     }
 
-    // ⚽ CADASTRAR PARTIDA (Conversa com o POST /partidas do Node)
+    // ⚽ CADASTRAR PARTIDA (Método POST correto para salvar na Render)
     async function cadastrarPartida() {
         const casa = document.getElementById("timeCasa").value.trim();
         const fora = document.getElementById("timeFora").value.trim();
@@ -193,8 +185,8 @@
         }
 
         try {
-            // Envia o JSON com as informações para a API do Node
-            const resposta = await fetch("http://localhost:3000/partidas", {
+            // Enviando as informações para salvar direto na nuvem da Render
+            const respuesta = await fetch("https://jucare-api.onrender.com/partidas", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -210,8 +202,8 @@
                 })
             });
 
-            if (resposta.ok) {
-                // Se o banco gravou com sucesso, limpa os campos do formulário
+            if (respuesta.ok) {
+                // Se gravou, limpa o formulário
                 document.getElementById("timeCasa").value = "";
                 document.getElementById("placarCasa").value = "";
                 document.getElementById("timeFora").value = "";
@@ -220,7 +212,7 @@
                 document.getElementById("assistenciaPartida").value = "";
                 document.getElementById("cartaoPartida").value = "";
 
-                // Atualiza a lista na tela chamando o banco de novo
+                // Atualiza a lista na tela chamando a lista de novo
                 puxarPartidasDoBanco();
             } else {
                 alert("❌ Erro ao tentar salvar a partida.");
